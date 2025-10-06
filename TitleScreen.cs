@@ -40,6 +40,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         _subnauticaLogo = GameObject.Find("logo");
         if (_subnauticaLogo == null) return;
         _targetPosition = Vector3.zero;
+        if (WorldObject.name == "NRE") return;
         _hoverishObject = WorldObject;
     }
 
