@@ -33,7 +33,7 @@ public class TitleScreen
             new Vector3(newVector3.x+35,newVector3.y,newVector3.z+20),
             new Vector3(newVector3.x+40,newVector3.y,newVector3.z-20),
         };
-        for (int i = 0; i < 27; i++)
+        for (int i = 0; i < Plugin.Options.HoverFishCount; i++)
         {
             foreach (var pos in newVector33)
             {
