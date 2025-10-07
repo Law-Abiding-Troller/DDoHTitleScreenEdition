@@ -3,6 +3,8 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using Nautilus.Handlers;
+using Nautilus.Utility;
 using UnityEngine;
 using UWE;
 
@@ -16,6 +18,8 @@ public class Plugin : BaseUnityPlugin
 
     private static Assembly Assembly { get; } = Assembly.GetExecutingAssembly();
 
+    public static ConfigOptions Options;
+
     public static GameObject HoverFishPrefab;
 
     public static IEnumerator GetHoverFishPrefab(BaseUnityPlugin plugin)
@@ -23,11 +27,16 @@ public class Plugin : BaseUnityPlugin
         CoroutineTask<GameObject> task = CraftData.GetPrefabForTechTypeAsync(TechType.Hoverfish);
         yield return task;
         HoverFishPrefab = task.GetResult();
+        if (HoverFishPrefab == null) yield break;
+        var wf = HoverFishPrefab.GetComponent<WorldForces>();
+        if (wf == null) PrefabUtils.AddWorldForces(HoverFishPrefab, 5).aboveWaterGravity = 0.5f;
+        else wf.aboveWaterGravity = 0.5f;
         TitleScreen.Register(plugin);
     }
 
     private void Awake()
     {
+        Options = OptionsPanelHandler.RegisterModOptions<ConfigOptions>();
         // set project-scoped logger instance
         Logger = base.Logger;
         StartCoroutine(GetHoverFishPrefab(this));
