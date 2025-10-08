@@ -22,6 +22,8 @@ public class Plugin : BaseUnityPlugin
 
     public static GameObject HoverFishPrefab;
 
+    public static GameObject UpdateScheduler;
+
     public static IEnumerator GetHoverFishPrefab(BaseUnityPlugin plugin)
     {
         CoroutineTask<GameObject> task = CraftData.GetPrefabForTechTypeAsync(TechType.Hoverfish);
@@ -33,8 +35,6 @@ public class Plugin : BaseUnityPlugin
         if (wf == null) PrefabUtils.AddWorldForces(HoverFishPrefab, 5).aboveWaterGravity = aWG;
         else wf.aboveWaterGravity = aWG;
         RemoveComponents();
-        var deez = Instantiate(new GameObject("deez"));
-        deez.AddComponent<UpdateScheduler>().updateFrequency = 1;
         TitleScreen.Register(plugin);
     }
 
@@ -56,11 +56,16 @@ public class Plugin : BaseUnityPlugin
     {
         var lwe = HoverFishPrefab.GetComponent<LargeWorldEntity>();
         if (lwe != null){ Destroy(lwe); }
+        UpdateScheduler = Instantiate(new GameObject("deez"));
+        var us = UpdateScheduler.AddComponent<UpdateScheduler>();
+        us.updateFrequency = 1;
+        us.updateTimer = Time.deltaTime;
     }
 
     public static void AddComponents(WaitScreenHandler.WaitScreenTask task)
     {
         task.Status = ("DDOH is repairing damage done to your game by DDOH");
         HoverFishPrefab.EnsureComponent<LargeWorldEntity>();
+        if (UpdateScheduler != null) Destroy(UpdateScheduler);
     }
 }
