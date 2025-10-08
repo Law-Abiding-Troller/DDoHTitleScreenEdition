@@ -18,20 +18,38 @@ public class TitleScreen
     public static GameObject SpawnNothing()
     {
         var _subnauticaLogo = GameObject.Find("logo");
-        if (_subnauticaLogo == null) return new  GameObject("NRE");
+        if (_subnauticaLogo == null) new GameObject("NRE");
         var newVector3 = new Vector3( _subnauticaLogo.transform.position.x - 20f,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
-        var hoverfishObject = Object.Instantiate(Plugin.HoverFishPrefab, newVector3, _subnauticaLogo.transform.rotation);
+        GameObject hoverfishObject = Object.Instantiate(Plugin.HoverFishPrefab, newVector3, _subnauticaLogo.transform.rotation);
         Vector3[] newVector33 =
         {
             new Vector3(newVector3.x,newVector3.y,newVector3.z+20),
             new Vector3(newVector3.x+5,newVector3.y,newVector3.z+20),
-            new Vector3(newVector3.x+10,newVector3.y,newVector3.z-20), 
+            new Vector3(newVector3.x+10,newVector3.y,newVector3.z+20), 
             new Vector3(newVector3.x+15,newVector3.y,newVector3.z+20),
-            new Vector3(newVector3.x+20,newVector3.y,newVector3.z-20), 
+            new Vector3(newVector3.x+20,newVector3.y,newVector3.z+20), 
             new Vector3(newVector3.x+25,newVector3.y,newVector3.z+20),
             new Vector3(newVector3.x+30,newVector3.y,newVector3.z+20),
             new Vector3(newVector3.x+35,newVector3.y,newVector3.z+20),
-            new Vector3(newVector3.x+40,newVector3.y,newVector3.z-20),
+            new Vector3(newVector3.x+40,newVector3.y,newVector3.z+20),
+            new Vector3(newVector3.x,newVector3.y,newVector3.z+15),
+            new Vector3(newVector3.x+5,newVector3.y,newVector3.z+15),
+            new Vector3(newVector3.x+10,newVector3.y,newVector3.z+15), 
+            new Vector3(newVector3.x+15,newVector3.y,newVector3.z+15),
+            new Vector3(newVector3.x+20,newVector3.y,newVector3.z+15), 
+            new Vector3(newVector3.x+25,newVector3.y,newVector3.z+15),
+            new Vector3(newVector3.x+30,newVector3.y,newVector3.z+15),
+            new Vector3(newVector3.x+35,newVector3.y,newVector3.z+15),
+            new Vector3(newVector3.x+40,newVector3.y,newVector3.z+15),
+            new Vector3(newVector3.x,newVector3.y,newVector3.z+25),
+            new Vector3(newVector3.x+5,newVector3.y,newVector3.z+25),
+            new Vector3(newVector3.x+10,newVector3.y,newVector3.z+25), 
+            new Vector3(newVector3.x+15,newVector3.y,newVector3.z+25),
+            new Vector3(newVector3.x+20,newVector3.y,newVector3.z+25), 
+            new Vector3(newVector3.x+25,newVector3.y,newVector3.z+25),
+            new Vector3(newVector3.x+30,newVector3.y,newVector3.z+25),
+            new Vector3(newVector3.x+35,newVector3.y,newVector3.z+25),
+            new Vector3(newVector3.x+40,newVector3.y,newVector3.z+25),
         };
         for (int i = 0; i < Plugin.Options.HoverFishCount; i++)
         {
