@@ -51,12 +51,12 @@ public class TitleScreen
             new Vector3(newVector3.x+35,newVector3.y,newVector3.z+25),
             new Vector3(newVector3.x+40,newVector3.y,newVector3.z+25),
         };
+        int j = 0;
         for (int i = 0; i < Plugin.Options.HoverFishCount; i++)
         {
-            foreach (var pos in newVector33)
-            {
-                Object.Instantiate(Plugin.HoverFishPrefab, pos, _subnauticaLogo.transform.rotation);
-            }
+            if (j == newVector33.Length) j = 0;
+            Object.Instantiate(Plugin.HoverFishPrefab, newVector33[j],_subnauticaLogo.transform.rotation);
+            j++;
         }
         return hoverfishObject;
     }
