@@ -29,8 +29,12 @@ public class Plugin : BaseUnityPlugin
         HoverFishPrefab = task.GetResult();
         if (HoverFishPrefab == null) yield break;
         var wf = HoverFishPrefab.GetComponent<WorldForces>();
-        if (wf == null) PrefabUtils.AddWorldForces(HoverFishPrefab, 5).aboveWaterGravity = 0.5f;
-        else wf.aboveWaterGravity = 0.5f;
+        float aWG = 0.5f;
+        if (wf == null) PrefabUtils.AddWorldForces(HoverFishPrefab, 5).aboveWaterGravity = aWG;
+        else wf.aboveWaterGravity = aWG;
+        RemoveComponents();
+        var deez = Instantiate(new GameObject("deez"));
+        deez.AddComponent<UpdateScheduler>().updateFrequency = 1;
         TitleScreen.Register(plugin);
     }
 
@@ -41,13 +45,22 @@ public class Plugin : BaseUnityPlugin
         Logger = base.Logger;
         StartCoroutine(GetHoverFishPrefab(this));
         // Initialize custom prefabs
-        InitializePrefabs();
         // register harmony patches, if there are any
         Harmony.CreateAndPatchAll(Assembly, $"{PluginInfo.PLUGIN_GUID}");
         Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+        WaitScreenHandler.RegisterEarlyLoadTask("DDoH",AddComponents);
+        SaveUtils.RegisterOnQuitEvent(RemoveComponents);
     }
 
-    private void InitializePrefabs()
+    public static void RemoveComponents()
     {
+        var lwe = HoverFishPrefab.GetComponent<LargeWorldEntity>();
+        if (lwe != null){ Destroy(lwe); }
+    }
+
+    public static void AddComponents(WaitScreenHandler.WaitScreenTask task)
+    {
+        task.Status = ("DDOH is repairing damage done to your game by DDOH");
+        HoverFishPrefab.EnsureComponent<LargeWorldEntity>();
     }
 }
