@@ -34,6 +34,10 @@ public class Plugin : BaseUnityPlugin
         float aWG = 0.5f;
         if (wf == null) PrefabUtils.AddWorldForces(HoverFishPrefab, 5).aboveWaterGravity = aWG;
         else wf.aboveWaterGravity = aWG;
+        foreach (var component in HoverFishPrefab.GetComponents<Component>())
+        {
+            Logger.LogDebug(component.GetType());
+        }
         RemoveComponents();
         TitleScreen.Register(plugin);
     }
@@ -56,7 +60,15 @@ public class Plugin : BaseUnityPlugin
     {
         var lwe = HoverFishPrefab.GetComponent<LargeWorldEntity>();
         if (lwe != null){ Destroy(lwe); }
+        var scared = HoverFishPrefab.GetComponent<Scareable>();
+        if (scared != null) { Destroy(scared); }
+        var fws = HoverFishPrefab.GetComponent<FleeWhenScared>();
+        if (fws != null) { Destroy(fws); }
+        var im = HoverFishPrefab.GetComponent<InfectedMixin>();
+        if (im != null) { Destroy(im); }
         UpdateScheduler = Instantiate(new GameObject("deez"));
+        var cf = HoverFishPrefab.GetComponent<CreatureFear>();
+        if (cf != null) { Destroy(cf); }
         var us = UpdateScheduler.AddComponent<UpdateScheduler>();
         us.updateFrequency = 1;
         us.updateTimer = Time.deltaTime;
@@ -66,6 +78,7 @@ public class Plugin : BaseUnityPlugin
     {
         task.Status = ("DDOH is repairing damage done to your game by DDOH");
         HoverFishPrefab.EnsureComponent<LargeWorldEntity>();
+        HoverFishPrefab.EnsureComponent<Scareable>();
         if (UpdateScheduler != null) Destroy(UpdateScheduler);
     }
 }
