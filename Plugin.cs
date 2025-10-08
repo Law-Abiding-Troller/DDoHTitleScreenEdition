@@ -1,8 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.CodeDom;
+using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using MonoMod.Utils;
 using Nautilus.Handlers;
 using Nautilus.Utility;
 using UnityEngine;
@@ -34,11 +38,17 @@ public class Plugin : BaseUnityPlugin
         float aWG = 0.5f;
         if (wf == null) PrefabUtils.AddWorldForces(HoverFishPrefab, 5).aboveWaterGravity = aWG;
         else wf.aboveWaterGravity = aWG;
-        foreach (var component in HoverFishPrefab.GetComponents<Component>())
-        {
-            Logger.LogDebug(component.GetType());
-        }
+        Logger.LogDebug("Pre component Removal");
+        //foreach (var component in HoverFishPrefab.GetComponents<Component>())
+        //{
+         //   RecursiveComponents(component);
+        //}
         RemoveComponents();
+        //Logger.LogDebug("Post component Removal");
+        //foreach (var component in HoverFishPrefab.GetComponents<Component>())
+        //{
+        //  RecursiveComponents(component);
+        //}
         TitleScreen.Register(plugin);
     }
 
@@ -52,7 +62,7 @@ public class Plugin : BaseUnityPlugin
         // register harmony patches, if there are any
         Harmony.CreateAndPatchAll(Assembly, $"{PluginInfo.PLUGIN_GUID}");
         Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
-        WaitScreenHandler.RegisterEarlyLoadTask("DDoH",AddComponents);
+        WaitScreenHandler.RegisterEarlyLoadTask("DDoH Title Edition",AddComponents);
         SaveUtils.RegisterOnQuitEvent(RemoveComponents);
     }
 
@@ -69,6 +79,8 @@ public class Plugin : BaseUnityPlugin
         UpdateScheduler = Instantiate(new GameObject("deez"));
         var cf = HoverFishPrefab.GetComponent<CreatureFear>();
         if (cf != null) { Destroy(cf); }
+        var sthp = HoverFishPrefab.GetComponent<SwimToHeroPeeper>();
+        if (sthp != null) { Destroy(sthp); }
         var us = UpdateScheduler.AddComponent<UpdateScheduler>();
         us.updateFrequency = 1;
         us.updateTimer = Time.deltaTime;
@@ -79,6 +91,38 @@ public class Plugin : BaseUnityPlugin
         task.Status = ("DDOH is repairing damage done to your game by DDOH");
         HoverFishPrefab.EnsureComponent<LargeWorldEntity>();
         HoverFishPrefab.EnsureComponent<Scareable>();
+        HoverFishPrefab.EnsureComponent<FleeWhenScared>();
+        HoverFishPrefab.EnsureComponent<InfectedMixin>();
+        HoverFishPrefab.EnsureComponent<CreatureFear>();
+        HoverFishPrefab.EnsureComponent<SwimToHeroPeeper>();
         if (UpdateScheduler != null) Destroy(UpdateScheduler);
     }
+
+    public static void RecursiveComponents<T>(T component, int i = 0, List<string> list = null) where T : Component
+    {
+        Logger.LogDebug(component.GetType());
+        list ??= new List<string>();
+        list.Add(component.GetType().Name);
+        bool done = false;
+        foreach (var comp in component.GetComponentsInChildren<Component>())
+        {
+            if (comp == null || list.Contains(comp.GetType().Name))
+            {
+                i = 0;
+                done = true;
+                continue;
+            }
+            done = false;
+            list.Add(comp.GetType().Name);
+            RecursiveComponents(comp, i, list);
+        }
+
+        if (done)
+        { 
+            foreach (var item in list)
+            {
+                Logger.LogDebug(item);
+            }
+        }
+}
 }
