@@ -39,16 +39,16 @@ public class Plugin : BaseUnityPlugin
         if (wf == null) PrefabUtils.AddWorldForces(HoverFishPrefab, 5).aboveWaterGravity = aWG;
         else wf.aboveWaterGravity = aWG;
         Logger.LogDebug("Pre component Removal");
-        //foreach (var component in HoverFishPrefab.GetComponents<Component>())
-        //{
-         //   RecursiveComponents(component);
-        //}
+        /*foreach (var component in HoverFishPrefab.GetAllComponentsInChildren<Component>())
+        {
+            Logger.LogDebug(component.GetType());
+        }*/
         RemoveComponents();
-        //Logger.LogDebug("Post component Removal");
-        //foreach (var component in HoverFishPrefab.GetComponents<Component>())
-        //{
-        //  RecursiveComponents(component);
-        //}
+        /*Logger.LogDebug("Post component Removal");
+        foreach (var component in HoverFishPrefab.GetAllComponentsInChildren<Component>())
+        {
+            Logger.LogDebug(component.GetType());
+        }*/
         TitleScreen.Register(plugin);
     }
 
@@ -97,32 +97,4 @@ public class Plugin : BaseUnityPlugin
         HoverFishPrefab.EnsureComponent<SwimToHeroPeeper>();
         if (UpdateScheduler != null) Destroy(UpdateScheduler);
     }
-
-    public static void RecursiveComponents<T>(T component, int i = 0, List<string> list = null) where T : Component
-    {
-        Logger.LogDebug(component.GetType());
-        list ??= new List<string>();
-        list.Add(component.GetType().Name);
-        bool done = false;
-        foreach (var comp in component.GetComponentsInChildren<Component>())
-        {
-            if (comp == null || list.Contains(comp.GetType().Name))
-            {
-                i = 0;
-                done = true;
-                continue;
-            }
-            done = false;
-            list.Add(comp.GetType().Name);
-            RecursiveComponents(comp, i, list);
-        }
-
-        if (done)
-        { 
-            foreach (var item in list)
-            {
-                Logger.LogDebug(item);
-            }
-        }
-}
 }

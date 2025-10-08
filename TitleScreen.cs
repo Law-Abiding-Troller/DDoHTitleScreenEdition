@@ -68,6 +68,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
     private GameObject _subnauticaLogo;
     private GameObject _hoverishObject;
     private Vector3 _targetPosition;
+    private Vector3 _targetScale;
     public static bool Enabled;
     private float _interloopation = 0f;
     public WorldTitleObjectHandler(Func<GameObject> spawnObject, float fadeInTime = 1, params string[] requiredGUIDs) : base(spawnObject, fadeInTime, requiredGUIDs)
@@ -79,7 +80,8 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         base.OnInitialize();
         _subnauticaLogo = GameObject.Find("logo");
         if (_subnauticaLogo == null) return;
-        _targetPosition = new Vector3(MainCamera.camera.transform.position.x, MainCamera.camera.transform.position.y, MainCamera.camera.transform.position.z - 3);
+        _targetPosition = new Vector3(MainCamera.camera.transform.position.x, MainCamera.camera.transform.position.y, MainCamera.camera.transform.position.z);
+        _targetScale = Vector3.one*2;
         if (WorldObject.name == "NRE") return;
         _hoverishObject = WorldObject;
     }
@@ -103,9 +105,8 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         if (_hoverishObject == null) return;
         if (_up != 0)
         {
-            
-            _hoverishObject.transform.position = Vector3.Lerp(_hoverishObject.transform.position, _targetPosition, Time.deltaTime);
-            _interloopation += Time.deltaTime;
+            _hoverishObject.transform.position = Vector3.MoveTowards(_hoverishObject.transform.position, _targetPosition, Time.deltaTime*5);
+            _hoverishObject.transform.localScale = Vector3.MoveTowards(_hoverishObject.transform.localScale, _targetScale, Time.deltaTime*10);
         }
 
         if (_hoverishObject.transform.position == _targetPosition )
@@ -114,16 +115,27 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             {
                 case 1:
                     _up = 2;
-                    _targetPosition = new Vector3(_subnauticaLogo.transform.position.x + 3f,
+                    _targetPosition = new Vector3(_subnauticaLogo.transform.position.x + 30f,
                         _subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
+                    _targetScale = Vector3.one*2;
                     break;
                 case 2:
                     _up = 3;
-                    _targetPosition = new Vector3(MainCamera.camera.transform.position.x, MainCamera.camera.transform.position.y, MainCamera.camera.transform.position.z - 3);
+                    _targetPosition = new Vector3(MainCamera.camera.transform.position.x, MainCamera.camera.transform.position.y, MainCamera.camera.transform.position.z+20f);
+                    _targetScale = Vector3.one;
                     break;
                 case 3:
+                    _up = 4;
+                    _targetPosition = new Vector3( _subnauticaLogo.transform.position.x - 30f,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
+                    _targetScale = Vector3.one*2;
+                    break;
+                case 4:
                     _up = 1;
-                    _targetPosition = new Vector3( _subnauticaLogo.transform.position.x - 3f,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
+                    _targetPosition = new Vector3(MainCamera.camera.transform.position.x, MainCamera.camera.transform.position.y, MainCamera.camera.transform.position.z+20f);
+                    _targetScale = Vector3.one;
+                    break;
+                default:
+                    _up = 0;
                     break;
             }
         }
