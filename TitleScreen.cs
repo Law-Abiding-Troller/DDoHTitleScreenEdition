@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using BepInEx;
 using HarmonyLib;
 using Nautilus.Handlers.TitleScreen;
 using UnityEngine;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace HoverfishTitleScreen;
@@ -18,13 +20,40 @@ public class TitleScreen
     public static GameObject SpawnNothing()
     {
         var _subnauticaLogo = GameObject.Find("logo");
-        if (_subnauticaLogo == null) new GameObject("NRE");
-        var newVector3 = new Vector3( _subnauticaLogo.transform.position.x - 20f,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
+        if (_subnauticaLogo == null) return new GameObject("NRE");
+        var newVector3 = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z+30);
         GameObject hoverfishObject = Object.Instantiate(Plugin.HoverFishPrefab, newVector3, _subnauticaLogo.transform.rotation);
+        return hoverfishObject;
+    }
+}
+
+public class WorldTitleObjectHandler : WorldObjectTitleAddon
+{
+    private int _up = 0;
+    private GameObject _subnauticaLogo;
+    private GameObject _hoverishObject;
+    private Vector3 _targetPosition;
+    private Vector3 _targetScale;
+    public static bool Enabled;
+    private GameObject[] hoverfishesObj = new GameObject[Plugin.Options.HoverFishCount*Plugin.Options.Multiplier];
+    private List<Renderer> _renderers = new List<Renderer>();
+    private List<Graphic> _graphics = new List<Graphic>();
+    private bool _fadingIn;
+    private float _currentFadeInTime;
+    public WorldTitleObjectHandler(Func<GameObject> spawnObject,  float fadeInTime = 1, params string[] requiredGUIDs) : base(spawnObject, fadeInTime, requiredGUIDs)
+    {
+    }
+
+    protected override void OnInitialize()
+    {
+        base.OnInitialize();
+        _subnauticaLogo = GameObject.Find("logo");
+        if (_subnauticaLogo == null) return;
+        var newVector3 = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
         Vector3[] newVector33 =
         {
-            new Vector3(newVector3.x,newVector3.y+1,newVector3.z-20),
-            new Vector3(newVector3.x+5,newVector3.y+1,newVector3.z-20),
+            new (newVector3.x,newVector3.y+1,newVector3.z-20),
+            new (newVector3.x+5,newVector3.y+1,newVector3.z-20),
             new Vector3(newVector3.x+10,newVector3.y+1,newVector3.z-20), 
             new Vector3(newVector3.x+15,newVector3.y+1,newVector3.z-20),
             new Vector3(newVector3.x+20,newVector3.y+1,newVector3.z-20), 
@@ -52,51 +81,62 @@ public class TitleScreen
             new Vector3(newVector3.x+40,newVector3.y+1,newVector3.z-25),
         };
         int j = 0;
-        for (int i = 0; i < Plugin.Options.HoverFishCount; i++)
+        for (int i = 0; i < Plugin.Options.HoverFishCount*Plugin.Options.Multiplier; i++)
         {
             if (j == newVector33.Length) j = 0;
-            Object.Instantiate(Plugin.HoverFishPrefab, newVector33[j],_subnauticaLogo.transform.rotation);
+            hoverfishesObj[i] = Object.Instantiate(Plugin.HoverFishPrefab, newVector33[j],_subnauticaLogo.transform.rotation);
+            hoverfishesObj[i].SetActive(true);
+            foreach (var r in hoverfishesObj[i].GetComponentsInChildren<Renderer>(true)) _renderers.Add(r);
+            foreach (var g in hoverfishesObj[i].GetComponentsInChildren<Graphic>(true)) _graphics.Add(g);
             j++;
         }
-        return hoverfishObject;
-    }
-}
-
-public class WorldTitleObjectHandler : WorldObjectTitleAddon
-{
-    private int _up = 0;
-    private GameObject _subnauticaLogo;
-    private GameObject _hoverishObject;
-    private Vector3 _targetPosition;
-    private Vector3 _targetScale;
-    public static bool Enabled;
-    private float _interloopation = 0f;
-    public WorldTitleObjectHandler(Func<GameObject> spawnObject, float fadeInTime = 1, params string[] requiredGUIDs) : base(spawnObject, fadeInTime, requiredGUIDs)
-    {
-    }
-
-    protected override void OnInitialize()
-    {
-        base.OnInitialize();
-        _subnauticaLogo = GameObject.Find("logo");
-        if (_subnauticaLogo == null) return;
-        _targetPosition = new Vector3(MainCamera.camera.transform.position.x, MainCamera.camera.transform.position.y, MainCamera.camera.transform.position.z);
+        //_targetPosition = new Vector3(MainCamera._camera.transform.position.x, MainCamera._camera.transform.position.y, MainCamera._camera.transform.position.z);
         _targetScale = Vector3.one*2;
         if (WorldObject.name == "NRE") return;
         _hoverishObject = WorldObject;
     }
+    private void UpdateObjectOpacities(float alpha)
+    {
+        if (!WorldObject) return;
 
+        foreach (var rend in _renderers)
+        {
+            rend.SetFadeAmount(alpha);
+        }
+        
+        foreach (var graphic in _graphics)
+        {
+            var col = new Color(graphic.color.r, graphic.color.g, graphic.color.b, alpha);
+            graphic.color = col;
+        }
+    }
     protected override void OnEnable()
     {
         base.OnEnable();
         Enabled = true;
         _up = 1;
+        foreach (var obj in hoverfishesObj)
+        {
+            obj.SetActive(true);
+        }
+        BehaviourUpdateUtils.Register(this);
+        _currentFadeInTime = 0;
+        _fadingIn = true;
     }
     protected override void OnDisable()
     {
         base.OnEnable();
         Enabled = false;
         _up = 0;
+        foreach (var obj in hoverfishesObj)
+        {
+            obj.SetActive(false);
+        }
+        if (!_fadingIn)
+            _currentFadeInTime = 0;
+        else
+            _currentFadeInTime = FadeInTime - _currentFadeInTime;
+        _fadingIn = false;
     }
 
     public override void ManagedUpdate()
@@ -106,7 +146,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         if (_up != 0)
         {
             _hoverishObject.transform.position = Vector3.MoveTowards(_hoverishObject.transform.position, _targetPosition, Time.deltaTime*5);
-            _hoverishObject.transform.localScale = Vector3.MoveTowards(_hoverishObject.transform.localScale, _targetScale, Time.deltaTime*10);
+            _hoverishObject.transform.localScale = Vector3.MoveTowards(_hoverishObject.transform.localScale, _targetScale, Time.deltaTime*2);
         }
 
         if (_hoverishObject.transform.position == _targetPosition )
@@ -121,23 +161,51 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
                     break;
                 case 2:
                     _up = 3;
-                    _targetPosition = new Vector3(MainCamera.camera.transform.position.x, MainCamera.camera.transform.position.y, MainCamera.camera.transform.position.z+20f);
+                    _targetPosition = new Vector3(MainCamera._camera.transform.position.x,
+                        MainCamera._camera.transform.position.y, MainCamera._camera.transform.position.z+20f);
                     _targetScale = Vector3.one;
                     break;
                 case 3:
                     _up = 4;
-                    _targetPosition = new Vector3( _subnauticaLogo.transform.position.x - 30f,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
+                    _targetPosition = new Vector3( _subnauticaLogo.transform.position.x - 30f,
+                        _subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
                     _targetScale = Vector3.one*2;
                     break;
                 case 4:
                     _up = 1;
-                    _targetPosition = new Vector3(MainCamera.camera.transform.position.x, MainCamera.camera.transform.position.y, MainCamera.camera.transform.position.z+20f);
+                    _targetPosition = new Vector3(MainCamera._camera.transform.position.x, 
+                        MainCamera._camera.transform.position.y, MainCamera._camera.transform.position.z+20f);
                     _targetScale = Vector3.one;
                     break;
                 default:
                     _up = 0;
                     break;
             }
+        }
+        if (!WorldObject)
+        {
+            BehaviourUpdateUtils.Deregister(this);
+            return;
+        }
+        
+        if (_currentFadeInTime < FadeInTime)
+        {
+            _currentFadeInTime += Time.deltaTime;
+            float normalizedProgress = _currentFadeInTime / Mathf.Max(FadeInTime, float.Epsilon);
+            UpdateObjectOpacities(_fadingIn ? normalizedProgress : 1 - normalizedProgress);
+
+            if (!_fadingIn && normalizedProgress >= 1)
+            {
+                WorldObject.SetActive(false);
+            }
+            else if (_fadingIn && normalizedProgress > 0)
+            {
+                WorldObject.SetActive(true);
+            }
+        }
+        else if (!_fadingIn)
+        {
+            BehaviourUpdateUtils.Deregister(this);
         }
     }
 }

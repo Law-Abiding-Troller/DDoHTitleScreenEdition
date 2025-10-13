@@ -49,6 +49,7 @@ public class Plugin : BaseUnityPlugin
         {
             Logger.LogDebug(component.GetType());
         }*/
+        WaitForSecondsRealtime wait = new WaitForSecondsRealtime(1f);
         TitleScreen.Register(plugin);
     }
 
