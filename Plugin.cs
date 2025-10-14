@@ -59,7 +59,6 @@ public class Plugin : BaseUnityPlugin
         // set project-scoped logger instance
         Logger = base.Logger;
         StartCoroutine(GetHoverFishPrefab(this));
-        // Initialize custom prefabs
         // register harmony patches, if there are any
         Harmony.CreateAndPatchAll(Assembly, $"{PluginInfo.PLUGIN_GUID}");
         Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");

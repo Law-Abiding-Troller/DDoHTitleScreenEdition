@@ -20,10 +20,11 @@ public class TitleScreen
     public static GameObject SpawnNothing()
     {
         var _subnauticaLogo = GameObject.Find("logo");
+        GameObject NRE = new GameObject("Hoverfish Parent");
         if (_subnauticaLogo == null) return new GameObject("NRE");
         var newVector3 = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z+30);
-        GameObject hoverfishObject = Object.Instantiate(Plugin.HoverFishPrefab, newVector3, _subnauticaLogo.transform.rotation);
-        return hoverfishObject;
+        GameObject hoverfishObject = Object.Instantiate(Plugin.HoverFishPrefab, newVector3, _subnauticaLogo.transform.rotation, NRE.transform);
+        return NRE;
     }
 }
 
@@ -84,16 +85,16 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         for (int i = 0; i < Plugin.Options.HoverFishCount*Plugin.Options.Multiplier; i++)
         {
             if (j == newVector33.Length) j = 0;
-            hoverfishesObj[i] = Object.Instantiate(Plugin.HoverFishPrefab, newVector33[j],_subnauticaLogo.transform.rotation);
+            hoverfishesObj[i] = Object.Instantiate(Plugin.HoverFishPrefab, newVector33[j],_subnauticaLogo.transform.rotation, WorldObject.transform);
             hoverfishesObj[i].SetActive(true);
-            foreach (var r in hoverfishesObj[i].GetComponentsInChildren<Renderer>(true)) _renderers.Add(r);
-            foreach (var g in hoverfishesObj[i].GetComponentsInChildren<Graphic>(true)) _graphics.Add(g);
+            foreach (var r in hoverfishesObj[i].GetComponentsInChildren<Renderer>(true)) if (r != null) _renderers.Add(r);
+            foreach (var g in hoverfishesObj[i].GetComponentsInChildren<Graphic>(true)) if (g != null) _graphics.Add(g);
             j++;
         }
         //_targetPosition = new Vector3(MainCamera._camera.transform.position.x, MainCamera._camera.transform.position.y, MainCamera._camera.transform.position.z);
         _targetScale = Vector3.one*2;
         if (WorldObject.name == "NRE") return;
-        _hoverishObject = WorldObject;
+        _hoverishObject = hoverfishesObj[0];
     }
     private void UpdateObjectOpacities(float alpha)
     {
