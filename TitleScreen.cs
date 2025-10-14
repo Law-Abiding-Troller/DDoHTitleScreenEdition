@@ -11,10 +11,11 @@ namespace HoverfishTitleScreen;
 
 public class TitleScreen
 {
+    public static WorldTitleObjectHandler HoverfishWTOBH = new(SpawnNothing);
     public static void Register(BaseUnityPlugin plugin)
     {
         TitleScreenHandler.RegisterTitleScreenObject("DDOH",new TitleScreenHandler.CustomTitleData(
-            "DDoH, Title Edition", new WorldTitleObjectHandler(SpawnNothing)));
+            "DDoH, Title Edition", HoverfishWTOBH));
     }
 
     public static GameObject SpawnNothing()
@@ -36,7 +37,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
     private Vector3 _targetPosition;
     private Vector3 _targetScale;
     public static bool Enabled;
-    private GameObject[] hoverfishesObj = new GameObject[Plugin.Options.HoverFishCount*Plugin.Options.Multiplier];
+    private List<GameObject> hoverfishesObj = new();
     private List<Renderer> _renderers = new List<Renderer>();
     private List<Graphic> _graphics = new List<Graphic>();
     private bool _fadingIn;
@@ -47,7 +48,6 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
 
     protected override void OnInitialize()
     {
-        base.OnInitialize();
         _subnauticaLogo = GameObject.Find("logo");
         if (_subnauticaLogo == null) return;
         var newVector3 = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
@@ -85,7 +85,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         for (int i = 0; i < Plugin.Options.HoverFishCount*Plugin.Options.Multiplier; i++)
         {
             if (j == newVector33.Length) j = 0;
-            hoverfishesObj[i] = Object.Instantiate(Plugin.HoverFishPrefab, newVector33[j],_subnauticaLogo.transform.rotation, WorldObject.transform);
+            hoverfishesObj.Add(Object.Instantiate(Plugin.HoverFishPrefab, newVector33[j],_subnauticaLogo.transform.rotation, WorldObject.transform));
             hoverfishesObj[i].SetActive(true);
             foreach (var r in hoverfishesObj[i].GetComponentsInChildren<Renderer>(true)) if (r != null) _renderers.Add(r);
             foreach (var g in hoverfishesObj[i].GetComponentsInChildren<Graphic>(true)) if (g != null) _graphics.Add(g);
@@ -95,6 +95,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         _targetScale = Vector3.one*2;
         if (WorldObject.name == "NRE") return;
         _hoverishObject = hoverfishesObj[0];
+        base.OnInitialize();
     }
     private void UpdateObjectOpacities(float alpha)
     {
@@ -111,6 +112,16 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             graphic.color = col;
         }
     }
+
+    public void MoreHoverfish(int num)
+    {
+        for (int i = 0; i < num; i++) hoverfishesObj.Add(Object.Instantiate(Plugin.HoverFishPrefab, hoverfishesObj[i].transform.position, Quaternion.identity, WorldObject.transform));
+    }
+
+    public void LessHoverfish()
+    {
+        
+    }
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -126,7 +137,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
     }
     protected override void OnDisable()
     {
-        base.OnEnable();
+        base.OnDisable();
         Enabled = false;
         _up = 0;
         foreach (var obj in hoverfishesObj)

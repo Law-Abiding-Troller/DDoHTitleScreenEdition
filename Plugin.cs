@@ -36,9 +36,19 @@ public class Plugin : BaseUnityPlugin
         if (HoverFishPrefab == null) yield break;
         var wf = HoverFishPrefab.GetComponent<WorldForces>();
         float aWG = 0.5f;
-        if (wf == null) PrefabUtils.AddWorldForces(HoverFishPrefab, 5).aboveWaterGravity = aWG;
-        else wf.aboveWaterGravity = aWG;
-        Logger.LogDebug("Pre component Removal");
+        float bWG = -0.5f;
+        if (wf == null)
+        {
+            var newwf = PrefabUtils.AddWorldForces(HoverFishPrefab, 5);
+            newwf.aboveWaterGravity = aWG;
+            newwf.underwaterGravity = bWG;
+        }
+        else
+        {
+            wf.aboveWaterGravity = aWG;
+            wf.underwaterGravity = bWG;
+        }
+        //Logger.LogDebug("Pre component Removal");
         /*foreach (var component in HoverFishPrefab.GetAllComponentsInChildren<Component>())
         {
             Logger.LogDebug(component.GetType());
