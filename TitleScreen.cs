@@ -147,7 +147,9 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         for (int i = 0; i < num; i++)
         {
             if (j == hoverfishesObj.Count) j = 0;
-            hoverfishesObj.Add(Object.Instantiate(Plugin.HoverFishPrefab, hoverfishesObj[j].transform.position, Quaternion.identity, WorldObject.transform));
+            var newHoverfish = Object.Instantiate(Plugin.HoverFishPrefab, hoverfishesObj[j].transform.position, Quaternion.identity, WorldObject.transform);
+            newHoverfish.SetActive(true);
+            hoverfishesObj.Add(newHoverfish);
             j++;
         }
     }
@@ -171,7 +173,11 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         for (int i = 0; i < num; i++)
         {
             if (i == j) break;
-            Object.Destroy(hoverfishesObj[i]);
+            var hoverfishToDestroy = hoverfishesObj[i];
+            hoverfishesObj.Remove(hoverfishToDestroy);
+            foreach (var r in hoverfishToDestroy.GetComponentsInChildren<Renderer>(true)) if (_renderers.Contains(r)) _renderers.Remove(r);
+            foreach (var g in hoverfishToDestroy.GetComponentsInChildren<Graphic>(true)) if (_graphics.Contains(g))_graphics.Remove(g);
+            Object.Destroy(hoverfishToDestroy);
         }
     }
     protected override void OnEnable()
