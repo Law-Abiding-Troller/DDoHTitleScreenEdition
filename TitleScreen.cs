@@ -42,6 +42,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
     private List<Graphic> _graphics = new List<Graphic>();
     private bool _fadingIn;
     private float _currentFadeInTime;
+    private GameObject _customSky;
     public WorldTitleObjectHandler(Func<GameObject> spawnObject,  float fadeInTime = 1, params string[] requiredGUIDs) : base(spawnObject, fadeInTime, requiredGUIDs)
     {
     }
@@ -54,6 +55,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             if (!Plugin.Options.CauseException) base.OnInitialize();
         _subnauticaLogo = GameObject.Find("logo");
         if (_subnauticaLogo == null || _subnauticaLogo.transform == null || _subnauticaLogo.transform.position == Vector3.zero) return;
+        _customSky = _subnauticaLogo.GetComponent<SkyApplier>().customSkyPrefab;
         lineRunning = 57;
         var basefishSpawnPoint = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
         if (basefishSpawnPoint.Equals(null) || basefishSpawnPoint == Vector3.zero) return;
@@ -149,6 +151,13 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             if (j == hoverfishesObj.Count) j = 0;
             var newHoverfish = Object.Instantiate(Plugin.HoverFishPrefab, hoverfishesObj[j].transform.position, Quaternion.identity, WorldObject.transform);
             newHoverfish.SetActive(true);
+            foreach (var applier in WorldObject.GetComponentsInChildren<SkyApplier>(true))
+            {
+                applier.anchorSky = Skies.Custom;
+                applier.customSkyPrefab = _customSky;
+            
+                applier.Start();
+            }
             hoverfishesObj.Add(newHoverfish);
             j++;
         }
