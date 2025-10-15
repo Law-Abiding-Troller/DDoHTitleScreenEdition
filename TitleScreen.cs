@@ -48,10 +48,15 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
 
     protected override void OnInitialize()
     {
+        int lineRunning = 54;
+        try
+        {
         _subnauticaLogo = GameObject.Find("logo");
         if (_subnauticaLogo == null || _subnauticaLogo.transform == null || _subnauticaLogo.transform.position == Vector3.zero) return;
+        lineRunning = 57;
         var basefishSpawnPoint = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
         if (basefishSpawnPoint.Equals(null) || basefishSpawnPoint == Vector3.zero) return;
+        lineRunning = 60;
         Vector3[] hoverfishSpawnPoints =
         {
             new (basefishSpawnPoint.x,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
@@ -82,25 +87,43 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             new Vector3(basefishSpawnPoint.x+35,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
             new Vector3(basefishSpawnPoint.x+40,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
         };
+        lineRunning = 90;
         int j = 0;
         for (int i = 0; i < Plugin.Options.HoverFishCount*Plugin.Options.Multiplier; i++)
         {
+            lineRunning = 95;
             if (j == hoverfishSpawnPoints.Length) j = 0;
+            lineRunning = 97;
             if (hoverfishesObj == null) hoverfishesObj = new List<GameObject>();
+            lineRunning = 99;
             var instantiatedHoverfish = Object.Instantiate(Plugin.HoverFishPrefab, hoverfishSpawnPoints[j],
                 _subnauticaLogo.transform.rotation, WorldObject.transform);
             if (!instantiatedHoverfish) instantiatedHoverfish.SetActive(true);
             if (instantiatedHoverfish == null) return;
+            lineRunning = 104;
             hoverfishesObj.Add(instantiatedHoverfish);
+            lineRunning = 106;
             foreach (var r in instantiatedHoverfish.GetComponentsInChildren<Renderer>(true)) if (r != null) _renderers.Add(r);
+            lineRunning = 108;
             foreach (var g in instantiatedHoverfish.GetComponentsInChildren<Graphic>(true)) if (g != null) _graphics.Add(g);
+            lineRunning = 110;
             j++;
         }
         //_targetPosition = new Vector3(MainCamera._camera.transform.position.x, MainCamera._camera.transform.position.y, MainCamera._camera.transform.position.z);
+        lineRunning = 114;
         _targetScale = Vector3.one*2;
+        lineRunning = 116;
         if (WorldObject.name == "NRE") return;
+        lineRunning = 118;
         _hoverishObject = hoverfishesObj[0];
+        lineRunning = 120;
         base.OnInitialize();
+        }
+        catch (Exception e)
+        {
+            Plugin.Logger.LogError($"Could not initialize. Failed on line {lineRunning}.\nStack trace:\n{e.StackTrace}");
+        }
+        
     }
     private void UpdateObjectOpacities(float alpha)
     {
