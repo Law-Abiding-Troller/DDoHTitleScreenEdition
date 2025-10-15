@@ -37,7 +37,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
     private Vector3 _targetPosition;
     private Vector3 _targetScale;
     public static bool Enabled;
-    private List<GameObject> hoverfishesObj = new();
+    private List<GameObject> hoverfishesObj = new List<GameObject>();
     private List<Renderer> _renderers = new List<Renderer>();
     private List<Graphic> _graphics = new List<Graphic>();
     private bool _fadingIn;
@@ -49,46 +49,51 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
     protected override void OnInitialize()
     {
         _subnauticaLogo = GameObject.Find("logo");
-        if (_subnauticaLogo == null) return;
-        var newVector3 = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
-        Vector3[] newVector33 =
+        if (_subnauticaLogo == null || _subnauticaLogo.transform == null || _subnauticaLogo.transform.position == Vector3.zero) return;
+        var basefishSpawnPoint = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
+        if (basefishSpawnPoint.Equals(null) || basefishSpawnPoint == Vector3.zero) return;
+        Vector3[] hoverfishSpawnPoints =
         {
-            new (newVector3.x,newVector3.y+1,newVector3.z-20),
-            new (newVector3.x+5,newVector3.y+1,newVector3.z-20),
-            new Vector3(newVector3.x+10,newVector3.y+1,newVector3.z-20), 
-            new Vector3(newVector3.x+15,newVector3.y+1,newVector3.z-20),
-            new Vector3(newVector3.x+20,newVector3.y+1,newVector3.z-20), 
-            new Vector3(newVector3.x+25,newVector3.y+1,newVector3.z-20),
-            new Vector3(newVector3.x+30,newVector3.y+1,newVector3.z-20),
-            new Vector3(newVector3.x+35,newVector3.y+1,newVector3.z-20),
-            new Vector3(newVector3.x+40,newVector3.y+1,newVector3.z-20),
-            new Vector3(newVector3.x,newVector3.y+1,newVector3.z-15),
-            new Vector3(newVector3.x+5,newVector3.y+1,newVector3.z-15),
-            new Vector3(newVector3.x+10,newVector3.y+1,newVector3.z-15), 
-            new Vector3(newVector3.x+15,newVector3.y+1,newVector3.z-15),
-            new Vector3(newVector3.x+20,newVector3.y+1,newVector3.z-15), 
-            new Vector3(newVector3.x+25,newVector3.y+1,newVector3.z-15),
-            new Vector3(newVector3.x+30,newVector3.y+1,newVector3.z-15),
-            new Vector3(newVector3.x+35,newVector3.y+1,newVector3.z-15),
-            new Vector3(newVector3.x+40,newVector3.y+1,newVector3.z-15),
-            new Vector3(newVector3.x,newVector3.y+1,newVector3.z-25),
-            new Vector3(newVector3.x+5,newVector3.y+1,newVector3.z-25),
-            new Vector3(newVector3.x+10,newVector3.y+1,newVector3.z-25), 
-            new Vector3(newVector3.x+15,newVector3.y+1,newVector3.z-25),
-            new Vector3(newVector3.x+20,newVector3.y+1,newVector3.z-25), 
-            new Vector3(newVector3.x+25,newVector3.y+1,newVector3.z-25),
-            new Vector3(newVector3.x+30,newVector3.y+1,newVector3.z-25),
-            new Vector3(newVector3.x+35,newVector3.y+1,newVector3.z-25),
-            new Vector3(newVector3.x+40,newVector3.y+1,newVector3.z-25),
+            new (basefishSpawnPoint.x,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
+            new (basefishSpawnPoint.x+5,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
+            new Vector3(basefishSpawnPoint.x+10,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20), 
+            new Vector3(basefishSpawnPoint.x+15,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
+            new Vector3(basefishSpawnPoint.x+20,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20), 
+            new Vector3(basefishSpawnPoint.x+25,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
+            new Vector3(basefishSpawnPoint.x+30,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
+            new Vector3(basefishSpawnPoint.x+35,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
+            new Vector3(basefishSpawnPoint.x+40,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
+            new Vector3(basefishSpawnPoint.x,basefishSpawnPoint.y+1,basefishSpawnPoint.z-15),
+            new Vector3(basefishSpawnPoint.x+5,basefishSpawnPoint.y+1,basefishSpawnPoint.z-15),
+            new Vector3(basefishSpawnPoint.x+10,basefishSpawnPoint.y+1,basefishSpawnPoint.z-15), 
+            new Vector3(basefishSpawnPoint.x+15,basefishSpawnPoint.y+1,basefishSpawnPoint.z-15),
+            new Vector3(basefishSpawnPoint.x+20,basefishSpawnPoint.y+1,basefishSpawnPoint.z-15), 
+            new Vector3(basefishSpawnPoint.x+25,basefishSpawnPoint.y+1,basefishSpawnPoint.z-15),
+            new Vector3(basefishSpawnPoint.x+30,basefishSpawnPoint.y+1,basefishSpawnPoint.z-15),
+            new Vector3(basefishSpawnPoint.x+35,basefishSpawnPoint.y+1,basefishSpawnPoint.z-15),
+            new Vector3(basefishSpawnPoint.x+40,basefishSpawnPoint.y+1,basefishSpawnPoint.z-15),
+            new Vector3(basefishSpawnPoint.x,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
+            new Vector3(basefishSpawnPoint.x+5,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
+            new Vector3(basefishSpawnPoint.x+10,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25), 
+            new Vector3(basefishSpawnPoint.x+15,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
+            new Vector3(basefishSpawnPoint.x+20,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25), 
+            new Vector3(basefishSpawnPoint.x+25,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
+            new Vector3(basefishSpawnPoint.x+30,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
+            new Vector3(basefishSpawnPoint.x+35,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
+            new Vector3(basefishSpawnPoint.x+40,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
         };
         int j = 0;
         for (int i = 0; i < Plugin.Options.HoverFishCount*Plugin.Options.Multiplier; i++)
         {
-            if (j == newVector33.Length) j = 0;
-            hoverfishesObj.Add(Object.Instantiate(Plugin.HoverFishPrefab, newVector33[j],_subnauticaLogo.transform.rotation, WorldObject.transform));
-            hoverfishesObj[i].SetActive(true);
-            foreach (var r in hoverfishesObj[i].GetComponentsInChildren<Renderer>(true)) if (r != null) _renderers.Add(r);
-            foreach (var g in hoverfishesObj[i].GetComponentsInChildren<Graphic>(true)) if (g != null) _graphics.Add(g);
+            if (j == hoverfishSpawnPoints.Length) j = 0;
+            if (hoverfishesObj == null) hoverfishesObj = new List<GameObject>();
+            var instantiatedHoverfish = Object.Instantiate(Plugin.HoverFishPrefab, hoverfishSpawnPoints[j],
+                _subnauticaLogo.transform.rotation, WorldObject.transform);
+            if (!instantiatedHoverfish) instantiatedHoverfish.SetActive(true);
+            if (instantiatedHoverfish == null) return;
+            hoverfishesObj.Add(instantiatedHoverfish);
+            foreach (var r in instantiatedHoverfish.GetComponentsInChildren<Renderer>(true)) if (r != null) _renderers.Add(r);
+            foreach (var g in instantiatedHoverfish.GetComponentsInChildren<Graphic>(true)) if (g != null) _graphics.Add(g);
             j++;
         }
         //_targetPosition = new Vector3(MainCamera._camera.transform.position.x, MainCamera._camera.transform.position.y, MainCamera._camera.transform.position.z);
