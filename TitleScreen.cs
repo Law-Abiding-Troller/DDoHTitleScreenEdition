@@ -51,6 +51,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         int lineRunning = 54;
         try
         {
+            if (!Plugin.Options.CauseException) base.OnInitialize();
         _subnauticaLogo = GameObject.Find("logo");
         if (_subnauticaLogo == null || _subnauticaLogo.transform == null || _subnauticaLogo.transform.position == Vector3.zero) return;
         lineRunning = 57;
@@ -117,7 +118,6 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         lineRunning = 118;
         _hoverishObject = hoverfishesObj[0];
         lineRunning = 120;
-        base.OnInitialize();
         }
         catch (Exception e)
         {
@@ -141,14 +141,38 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         }
     }
 
-    public void MoreHoverfish(int num)
+    private void MoreHoverfish(int num)
     {
-        for (int i = 0; i < num; i++) hoverfishesObj.Add(Object.Instantiate(Plugin.HoverFishPrefab, hoverfishesObj[i].transform.position, Quaternion.identity, WorldObject.transform));
+        int j = 0;
+        for (int i = 0; i < num; i++)
+        {
+            if (j == hoverfishesObj.Count) j = 0;
+            hoverfishesObj.Add(Object.Instantiate(Plugin.HoverFishPrefab, hoverfishesObj[j].transform.position, Quaternion.identity, WorldObject.transform));
+            j++;
+        }
     }
 
-    public void LessHoverfish()
+    public void LessOrMoreHoverfish(int num)
     {
-        
+        if (num == hoverfishesObj.Count) return;
+        if (num > hoverfishesObj.Count)
+        {
+            MoreHoverfish(num - hoverfishesObj.Count);
+        }
+        if (num < hoverfishesObj.Count)
+        {
+            LessHoverfish(hoverfishesObj.Count - num);
+        }
+
+    }
+    private void LessHoverfish(int num)
+    {
+        int j = hoverfishesObj.Count;
+        for (int i = 0; i < num; i++)
+        {
+            if (i == j) break;
+            Object.Destroy(hoverfishesObj[i]);
+        }
     }
     protected override void OnEnable()
     {
