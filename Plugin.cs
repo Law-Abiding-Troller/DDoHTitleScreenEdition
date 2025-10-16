@@ -86,12 +86,12 @@ public class Plugin : BaseUnityPlugin
         if (fws != null) { Destroy(fws); }
         var im = HoverFishPrefab.GetComponent<InfectedMixin>();
         if (im != null) { Destroy(im); }
-        UpdateScheduler = Instantiate(new GameObject("deez"));
         var cf = HoverFishPrefab.GetComponent<CreatureFear>();
         if (cf != null) { Destroy(cf); }
         var sthp = HoverFishPrefab.GetComponent<SwimToHeroPeeper>();
         if (sthp != null) { Destroy(sthp); }
         var us = UpdateScheduler.AddComponent<UpdateScheduler>();
+        UpdateScheduler = Instantiate(new GameObject("deez"));
         us.updateFrequency = 1;
         us.updateTimer = Time.deltaTime;
     }

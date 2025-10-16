@@ -40,8 +40,6 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
     private List<GameObject> hoverfishesObj = new List<GameObject>();
     private List<Renderer> _renderers = new List<Renderer>();
     private List<Graphic> _graphics = new List<Graphic>();
-    private bool _fadingIn;
-    private float _currentFadeInTime;
     private GameObject _customSky;
     public WorldTitleObjectHandler(Func<GameObject> spawnObject,  float fadeInTime = 1, params string[] requiredGUIDs) : base(spawnObject, fadeInTime, requiredGUIDs)
     {
@@ -55,11 +53,12 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             if (!Plugin.Options.CauseException) base.OnInitialize();
         _subnauticaLogo = GameObject.Find("logo");
         if (_subnauticaLogo == null || _subnauticaLogo.transform == null || _subnauticaLogo.transform.position == Vector3.zero) return;
-        _customSky = _subnauticaLogo.GetComponent<SkyApplier>().customSkyPrefab;
-        lineRunning = 57;
+        if (_subnauticaLogo.TryGetComponent(typeof(SkyApplier), out var component)) _customSky =
+            _subnauticaLogo.GetComponent<SkyApplier>().customSkyPrefab;
+        lineRunning = 61;
         var basefishSpawnPoint = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
         if (basefishSpawnPoint.Equals(null) || basefishSpawnPoint == Vector3.zero) return;
-        lineRunning = 60;
+        lineRunning = 64;
         Vector3[] hoverfishSpawnPoints =
         {
             new (basefishSpawnPoint.x,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
@@ -90,36 +89,33 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             new Vector3(basefishSpawnPoint.x+35,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
             new Vector3(basefishSpawnPoint.x+40,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
         };
-        lineRunning = 90;
+        lineRunning = 94;
         int j = 0;
         for (int i = 0; i < Plugin.Options.HoverFishCount*Plugin.Options.Multiplier; i++)
         {
-            lineRunning = 95;
+            lineRunning = 98;
             if (j == hoverfishSpawnPoints.Length) j = 0;
-            lineRunning = 97;
+            lineRunning = 100;
             if (hoverfishesObj == null) hoverfishesObj = new List<GameObject>();
-            lineRunning = 99;
+            lineRunning = 102;
             var instantiatedHoverfish = Object.Instantiate(Plugin.HoverFishPrefab, hoverfishSpawnPoints[j],
                 _subnauticaLogo.transform.rotation, WorldObject.transform);
             if (!instantiatedHoverfish) instantiatedHoverfish.SetActive(true);
             if (instantiatedHoverfish == null) return;
-            lineRunning = 104;
+            if (_hoverishObject == null)  _hoverishObject = instantiatedHoverfish;
+            lineRunning = 107;
             hoverfishesObj.Add(instantiatedHoverfish);
-            lineRunning = 106;
+            lineRunning = 109;
             foreach (var r in instantiatedHoverfish.GetComponentsInChildren<Renderer>(true)) if (r != null) _renderers.Add(r);
-            lineRunning = 108;
+            lineRunning = 112;
             foreach (var g in instantiatedHoverfish.GetComponentsInChildren<Graphic>(true)) if (g != null) _graphics.Add(g);
-            lineRunning = 110;
+            lineRunning = 114;
             j++;
         }
         //_targetPosition = new Vector3(MainCamera._camera.transform.position.x, MainCamera._camera.transform.position.y, MainCamera._camera.transform.position.z);
         lineRunning = 114;
         _targetScale = Vector3.one*2;
         lineRunning = 116;
-        if (WorldObject.name == "NRE") return;
-        lineRunning = 118;
-        _hoverishObject = hoverfishesObj[0];
-        lineRunning = 120;
         }
         catch (Exception e)
         {
@@ -154,6 +150,11 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             foreach (var applier in WorldObject.GetComponentsInChildren<SkyApplier>(true))
             {
                 applier.anchorSky = Skies.Custom;
+                if (_customSky == null)
+                {
+                    var skyApplier = _subnauticaLogo.GetComponent<SkyApplier>();
+                    if (skyApplier != null) _customSky = skyApplier.customSkyPrefab;
+                }
                 applier.customSkyPrefab = _customSky;
             
                 applier.Start();
@@ -178,7 +179,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
     }
     private void LessHoverfish(int num)
     {
-        int j = hoverfishesObj.Count;
+        int j = hoverfishesObj.ToArray().Length;
         for (int i = 0; i < num; i++)
         {
             if (i == j) break;
@@ -194,28 +195,12 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
         base.OnEnable();
         Enabled = true;
         _up = 1;
-        foreach (var obj in hoverfishesObj)
-        {
-            obj.SetActive(true);
-        }
-        BehaviourUpdateUtils.Register(this);
-        _currentFadeInTime = 0;
-        _fadingIn = true;
     }
     protected override void OnDisable()
     {
         base.OnDisable();
         Enabled = false;
         _up = 0;
-        foreach (var obj in hoverfishesObj)
-        {
-            obj.SetActive(false);
-        }
-        if (!_fadingIn)
-            _currentFadeInTime = 0;
-        else
-            _currentFadeInTime = FadeInTime - _currentFadeInTime;
-        _fadingIn = false;
     }
 
     public override void ManagedUpdate()
@@ -260,31 +245,6 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
                     _up = 0;
                     break;
             }
-        }
-        if (!WorldObject)
-        {
-            BehaviourUpdateUtils.Deregister(this);
-            return;
-        }
-        
-        if (_currentFadeInTime < FadeInTime)
-        {
-            _currentFadeInTime += Time.deltaTime;
-            float normalizedProgress = _currentFadeInTime / Mathf.Max(FadeInTime, float.Epsilon);
-            UpdateObjectOpacities(_fadingIn ? normalizedProgress : 1 - normalizedProgress);
-
-            if (!_fadingIn && normalizedProgress >= 1)
-            {
-                WorldObject.SetActive(false);
-            }
-            else if (_fadingIn && normalizedProgress > 0)
-            {
-                WorldObject.SetActive(true);
-            }
-        }
-        else if (!_fadingIn)
-        {
-            BehaviourUpdateUtils.Deregister(this);
         }
     }
 }
