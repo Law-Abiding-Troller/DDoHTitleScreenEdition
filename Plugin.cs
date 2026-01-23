@@ -2,11 +2,13 @@
 using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using MonoMod.Utils;
+using Nautilus.Assets;
 using Nautilus.Handlers;
 using Nautilus.Utility;
 using UnityEngine;
@@ -28,7 +30,9 @@ public class Plugin : BaseUnityPlugin
 
     public static GameObject UpdateScheduler;
 
-    public static IEnumerator GetHoverFishPrefab(BaseUnityPlugin plugin)
+    public static AssetBundle Bundle;
+
+    public static IEnumerator GetHoverFishPrefab()
     {
         CoroutineTask<GameObject> task = CraftData.GetPrefabForTechTypeAsync(TechType.Hoverfish);
         yield return task;
@@ -48,6 +52,12 @@ public class Plugin : BaseUnityPlugin
             wf.aboveWaterGravity = aWG;
             wf.underwaterGravity = bWG;
         }
+        var assetBundleRequest = AssetBundle.LoadFromFileAsync(Path.Combine(Path.GetDirectoryName(Assembly.Location), "Assets", "ddohassetbundleedition"));
+        yield return assetBundleRequest;
+        Bundle = assetBundleRequest.assetBundle;
+        var pI = PrefabInfo.WithTechType("DragonFish");
+        var dragonFish = new DragonFish(pI);
+        dragonFish.Register();
         //Logger.LogDebug("Pre component Removal");
         /*foreach (var component in HoverFishPrefab.GetAllComponentsInChildren<Component>())
         {
@@ -59,8 +69,6 @@ public class Plugin : BaseUnityPlugin
         {
             Logger.LogDebug(component.GetType());
         }*/
-        WaitForSecondsRealtime wait = new WaitForSecondsRealtime(1f);
-        TitleScreen.Register(plugin);
     }
 
     private void Awake()
@@ -68,12 +76,13 @@ public class Plugin : BaseUnityPlugin
         Options = OptionsPanelHandler.RegisterModOptions<ConfigOptions>();
         // set project-scoped logger instance
         Logger = base.Logger;
-        StartCoroutine(GetHoverFishPrefab(this));
+        StartCoroutine(GetHoverFishPrefab());
         // register harmony patches, if there are any
         Harmony.CreateAndPatchAll(Assembly, $"{PluginInfo.PLUGIN_GUID}");
         Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
-        WaitScreenHandler.RegisterEarlyLoadTask("DDoH Title Edition",AddComponents);
+        WaitScreenHandler.RegisterEarlyLoadTask("DDoH Mod Edition",AddComponents);
         SaveUtils.RegisterOnQuitEvent(RemoveComponents);
+        TitleScreen.Register(this);
     }
 
     public static void RemoveComponents()
