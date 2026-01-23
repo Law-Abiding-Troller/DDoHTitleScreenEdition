@@ -55,9 +55,10 @@ public class Plugin : BaseUnityPlugin
         var assetBundleRequest = AssetBundle.LoadFromFileAsync(Path.Combine(Path.GetDirectoryName(Assembly.Location), "Assets", "ddohassetbundleedition"));
         yield return assetBundleRequest;
         Bundle = assetBundleRequest.assetBundle;
-        var pI = PrefabInfo.WithTechType("DragonFish");
-        var dragonFish = new DragonFish(pI);
-        dragonFish.Register();
+        var pI = PrefabInfo.WithTechType("DragonFish_Blend");
+        var pI1 = PrefabInfo.WithTechType("DragonFish_Fbx");
+        new DragonFish(pI).Register();
+        new DragonFish(pI1).Register();
         //Logger.LogDebug("Pre component Removal");
         /*foreach (var component in HoverFishPrefab.GetAllComponentsInChildren<Component>())
         {

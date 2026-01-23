@@ -2,6 +2,7 @@ using System.Collections;
 using ECCLibrary;
 using ECCLibrary.Data;
 using Nautilus.Assets;
+using Nautilus.Extensions;
 using Nautilus.Utility;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ public class DragonFish : CreatureAsset
 
     protected override CreatureTemplate CreateTemplate()
     {
-        var template = new CreatureTemplate(Plugin.Bundle.LoadAsset<GameObject>("DragonFish_Blend"), BehaviourType.MediumFish, EcoTargetType.MediumFish, 320f);
+        var template = new CreatureTemplate(Plugin.Bundle.LoadAsset<GameObject>(PrefabInfo.ClassID), BehaviourType.MediumFish, EcoTargetType.MediumFish, 320f);
         CreatureTemplateUtils.SetCreatureDataEssentials(template, LargeWorldEntity.CellLevel.Medium, 100f);
         CreatureTemplateUtils.SetCreatureMotionEssentials(template,
             new SwimRandomData(0.4f, 4f, new Vector3(40f, 10f, 40f)), 
@@ -30,6 +31,14 @@ public class DragonFish : CreatureAsset
 
     protected override IEnumerator ModifyPrefab(GameObject prefab, CreatureComponents components)
     {
+        if (!prefab.TryGetComponent<SkinnedMeshRenderer>(out var sMr)) yield break;
+        sMr.material.SetFloat(ShaderPropertyID._MyCullVariable, 0f);
+        /*var request = CraftData.GetPrefabForTechTypeAsync(TechType.GhostLeviathan);
+        yield return request;
+        var ghostPrefab = request.GetResult();
+        if (!ghostPrefab.TryGetComponent<Animator>(out var animation))  yield break;
+        var animator = prefab.AddComponent<Animator>();
+        animator.runtimeAnimatorController = animation.runtimeAnimatorController;*/
         yield return null;
     }
 }
