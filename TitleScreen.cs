@@ -22,7 +22,7 @@ public class TitleScreen
     {
         var _subnauticaLogo = GameObject.Find("logo");
         GameObject NRE = new GameObject("Hoverfish Parent");
-        if (_subnauticaLogo == null) return new GameObject("NRE");
+        if (_subnauticaLogo == null) return NRE;
         var newVector3 = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z+30);
         GameObject hoverfishObject = Object.Instantiate(Plugin.HoverFishPrefab, newVector3, _subnauticaLogo.transform.rotation, NRE.transform);
         return NRE;
@@ -53,13 +53,13 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             if (!Plugin.Options.CauseException) base.OnInitialize();
         _subnauticaLogo = GameObject.Find("logo");
         if (_subnauticaLogo == null || _subnauticaLogo.transform == null || _subnauticaLogo.transform.position == Vector3.zero) return;
-        if (_subnauticaLogo.TryGetComponent(typeof(SkyApplier), out var component)) _customSky =
-            _subnauticaLogo.GetComponent<SkyApplier>().customSkyPrefab;
+        if (_subnauticaLogo.TryGetComponent<SkyApplier>(out var component)) _customSky =
+            component.customSkyPrefab;
         lineRunning = 61;
         var basefishSpawnPoint = new Vector3( _subnauticaLogo.transform.position.x,_subnauticaLogo.transform.position.y, _subnauticaLogo.transform.position.z);
         if (basefishSpawnPoint.Equals(null) || basefishSpawnPoint == Vector3.zero) return;
         lineRunning = 64;
-        Vector3[] hoverfishSpawnPoints =
+        /*Vector3[] hoverfishSpawnPoints =
         {
             new (basefishSpawnPoint.x,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
             new (basefishSpawnPoint.x+5,basefishSpawnPoint.y+1,basefishSpawnPoint.z-20),
@@ -88,17 +88,22 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             new Vector3(basefishSpawnPoint.x+30,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
             new Vector3(basefishSpawnPoint.x+35,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
             new Vector3(basefishSpawnPoint.x+40,basefishSpawnPoint.y+1,basefishSpawnPoint.z-25),
-        };
+        };*/
         lineRunning = 94;
-        int j = 0;
+        int x = 0;
+        int z = 0;
         for (int i = 0; i < Plugin.Options.HoverFishCount*Plugin.Options.Multiplier; i++)
         {
             lineRunning = 98;
-            if (j == hoverfishSpawnPoints.Length) j = 0;
+            if (x == 40) x = 0;
+            if (z == 25) {z = 0;
+                x++;
+            }
             lineRunning = 100;
             if (hoverfishesObj == null) hoverfishesObj = new List<GameObject>();
             lineRunning = 102;
-            var instantiatedHoverfish = Object.Instantiate(Plugin.HoverFishPrefab, hoverfishSpawnPoints[j],
+            var instantiatedHoverfish = Object.Instantiate(Plugin.HoverFishPrefab, 
+                new Vector3(basefishSpawnPoint.x+x, basefishSpawnPoint.y+1, basefishSpawnPoint.z-z),
                 _subnauticaLogo.transform.rotation, WorldObject.transform);
             if (!instantiatedHoverfish) instantiatedHoverfish.SetActive(true);
             if (instantiatedHoverfish == null) return;
@@ -110,7 +115,7 @@ public class WorldTitleObjectHandler : WorldObjectTitleAddon
             lineRunning = 112;
             foreach (var g in instantiatedHoverfish.GetComponentsInChildren<Graphic>(true)) if (g != null) _graphics.Add(g);
             lineRunning = 114;
-            j++;
+            z++;
         }
         //_targetPosition = new Vector3(MainCamera._camera.transform.position.x, MainCamera._camera.transform.position.y, MainCamera._camera.transform.position.z);
         lineRunning = 114;
