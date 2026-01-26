@@ -55,16 +55,16 @@ public class Plugin : BaseUnityPlugin
         var assetBundleRequest = AssetBundle.LoadFromFileAsync(Path.Combine(Path.GetDirectoryName(Assembly.Location), "Assets", "ddohassetbundleedition"));
         yield return assetBundleRequest;
         Bundle = assetBundleRequest.assetBundle;
-        var pI = PrefabInfo.WithTechType("DragonFish_Blend");
-        var pI1 = PrefabInfo.WithTechType("DragonFish_Fbx");
-        new DragonFish(pI).Register();
+        var pI1 = PrefabInfo.WithTechType("DragonFish")
+            .WithIcon(Bundle.LoadAsset<Sprite>("DragonFish_Icon"))
+            .WithSizeInInventory(new(2,2));
         new DragonFish(pI1).Register();
         //Logger.LogDebug("Pre component Removal");
         /*foreach (var component in HoverFishPrefab.GetAllComponentsInChildren<Component>())
         {
             Logger.LogDebug(component.GetType());
         }*/
-        RemoveComponents();
+        //RemoveComponents();
         /*Logger.LogDebug("Post component Removal");
         foreach (var component in HoverFishPrefab.GetAllComponentsInChildren<Component>())
         {
@@ -81,8 +81,8 @@ public class Plugin : BaseUnityPlugin
         // register harmony patches, if there are any
         Harmony.CreateAndPatchAll(Assembly, $"{PluginInfo.PLUGIN_GUID}");
         Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
-        WaitScreenHandler.RegisterEarlyLoadTask("DDoH Mod Edition",AddComponents);
-        SaveUtils.RegisterOnQuitEvent(RemoveComponents);
+        //WaitScreenHandler.RegisterEarlyLoadTask("DDoH Mod Edition",AddComponents);
+        //SaveUtils.RegisterOnQuitEvent(RemoveComponents);
         TitleScreen.Register(this);
     }
 
